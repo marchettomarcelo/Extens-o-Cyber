@@ -1,0 +1,32 @@
+body {
+  font-family: Arial, sans-serif;
+  width: 300px;
+  padding: 10px;
+}
+
+h1 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  font-size: 16px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+p {
+  margin: 5px 0;
+}
+
+ul {
+  list-style-type: disc;
+  margin-left: 20px;
+  padding-left: 0;
+  word-break: break-all; /* Para evitar que textos longos quebrem o layout */
+}
+
+.alert {
+  color: red;
+  font-weight: bold;
+}
