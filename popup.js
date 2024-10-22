@@ -18,7 +18,21 @@ document.addEventListener("DOMContentLoaded", () => {
 						content.innerHTML = "";
 
 						// Chamar a função para obter os cookies
-						getCookies(url, content, response);
+						getCookies(url, content, response)
+							.then((cookiesInfo) => {
+								// Adiciona os outros conteúdos (conexões, hijacking, etc.)
+								addOtherContents(content, response);
+
+								// Calcula a pontuação de privacidade
+								let privacyScore = calculatePrivacyScore(response, cookiesInfo);
+
+								// Exibe a pontuação no popup
+								let scoreHTML = `<h2>Pontuação de Privacidade</h2><p>A pontuação de privacidade desta página é: <strong>${privacyScore}/100</strong></p>`;
+								content.innerHTML = scoreHTML + content.innerHTML;
+							})
+							.catch((error) => {
+								console.error("Erro ao obter cookies e calcular a pontuação:", error);
+							});
 					})
 					.catch((error) => {
 						console.error("Erro ao enviar mensagem:", error);
@@ -36,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function getCookies(url, content, response) {
 	let domain = new URL(url).hostname;
 
-	browser.cookies
+	return browser.cookies
 		.getAll({ domain: domain })
 		.then((cookies) => {
 			let firstPartyCookies = 0;
@@ -67,21 +81,29 @@ function getCookies(url, content, response) {
 			});
 
 			// Atualiza o HTML dos cookies
-			let cookiesHTML = "<h2>Cookies</h2>";
+			let cookiesHTML = "<div class='section'><h2>Cookies</h2>";
 			cookiesHTML += `<p>Cookies de Primeira Parte: ${firstPartyCookies}</p>`;
 			cookiesHTML += `<p>Cookies de Terceira Parte: ${thirdPartyCookies}</p>`;
 			cookiesHTML += `<p>Cookies de Sessão: ${sessionCookies}</p>`;
 			cookiesHTML += `<p>Cookies Persistentes: ${persistentCookies}</p>`;
 			cookiesHTML += `<p>Supercookies: ${supercookies}</p>`;
+			cookiesHTML += "</div>";
 
 			// Adiciona o conteúdo dos cookies
 			content.innerHTML += cookiesHTML;
 
-			// Adiciona os outros conteúdos (conexões, hijacking, etc.)
-			addOtherContents(content, response);
+			// Retorna informações dos cookies para uso no cálculo da pontuação
+			return {
+				firstPartyCookies,
+				thirdPartyCookies,
+				sessionCookies,
+				persistentCookies,
+				supercookies,
+			};
 		})
 		.catch((error) => {
 			console.error("Erro ao obter cookies:", error);
+			return null;
 		});
 }
 
@@ -90,7 +112,7 @@ function addOtherContents(content, response) {
 	console.log("Adicionando outros conteúdos:", response);
 
 	// Conexões de terceira parte
-	let thirdPartyHTML = "<h2>Conexões de Terceira Parte</h2>";
+	let thirdPartyHTML = "<div class='section'><h2>Conexões de Terceira Parte</h2>";
 	if (response.thirdPartyConnections && response.thirdPartyConnections.length > 0) {
 		thirdPartyHTML += "<ul>";
 		response.thirdPartyConnections.forEach((domain) => {
@@ -100,13 +122,20 @@ function addOtherContents(content, response) {
 	} else {
 		thirdPartyHTML += "<p>Nenhuma conexão de terceira parte detectada.</p>";
 	}
+	thirdPartyHTML += "</div>";
 
 	// Ameaças de Hijacking
-	let hijackingHTML = "<h2>Ameaças de Hijacking</h2>";
+	let hijackingHTML = "<div class='section'><h2>Ameaças de Hijacking</h2>";
 	hijackingHTML += `<p>${response.potentialHijacking ? '<span class="alert">Potencial ameaça detectada!</span>' : "Nenhuma ameaça detectada."}</p>`;
+	hijackingHTML += "</div>";
+
+	// Canvas Fingerprinting
+	let canvasHTML = "<div class='section'><h2>Canvas Fingerprinting</h2>";
+	canvasHTML += `<p>${response.contentData && response.contentData.canvasFingerprintingDetected ? '<span class="alert">Canvas Fingerprinting detectado!</span>' : "Nenhum Canvas Fingerprinting detectado."}</p>`;
+	canvasHTML += "</div>";
 
 	// Armazenamento Local
-	let storageHTML = "<h2>Armazenamento Local</h2>";
+	let storageHTML = "<div class='section'><h2>Armazenamento Local</h2>";
 	if (response.contentData && response.contentData.localStorageUsed) {
 		storageHTML += "<p>Dados armazenados no <strong>localStorage</strong>:</p>";
 		storageHTML += "<ul>";
@@ -118,11 +147,44 @@ function addOtherContents(content, response) {
 	} else {
 		storageHTML += "<p>Nenhum dado armazenado no <strong>localStorage</strong>.</p>";
 	}
-
-	// Canvas Fingerprinting
-	let canvasHTML = "<h2>Canvas Fingerprinting</h2>";
-	canvasHTML += `<p>${response.contentData && response.contentData.canvasFingerprintingDetected ? '<span class="alert">Canvas Fingerprinting detectado!</span>' : "Nenhum Canvas Fingerprinting detectado."}</p>`;
+	storageHTML += "</div>";
 
 	// Adiciona os conteúdos ao popup
 	content.innerHTML += thirdPartyHTML + hijackingHTML + canvasHTML + storageHTML;
+}
+
+function calculatePrivacyScore(response, cookiesInfo) {
+	let score = 0;
+
+	// Conexões de Terceira Parte (30 pontos)
+	let thirdPartyConnectionsScore = 30;
+	if (response.thirdPartyConnections && response.thirdPartyConnections.length > 0) {
+		// Supondo que 10 ou mais conexões reduzem a pontuação a 0
+		let reduction = Math.min(response.thirdPartyConnections.length * 3, 30);
+		thirdPartyConnectionsScore -= reduction;
+	}
+	score += thirdPartyConnectionsScore;
+
+	// Cookies de Terceira Parte (25 pontos)
+	let thirdPartyCookiesScore = 25;
+	if (cookiesInfo.thirdPartyCookies > 0) {
+		// Supondo que 10 ou mais cookies reduzem a pontuação a 0
+		let reduction = Math.min(cookiesInfo.thirdPartyCookies * 2.5, 25);
+		thirdPartyCookiesScore -= reduction;
+	}
+	score += thirdPartyCookiesScore;
+
+	// Uso de Armazenamento Local (15 pontos)
+	let localStorageScore = response.contentData && response.contentData.localStorageUsed ? 0 : 15;
+	score += localStorageScore;
+
+	// Canvas Fingerprinting (20 pontos)
+	let canvasFingerprintingScore = response.contentData && response.contentData.canvasFingerprintingDetected ? 0 : 20;
+	score += canvasFingerprintingScore;
+
+	// Potenciais Ameaças de Hijacking (10 pontos)
+	let hijackingScore = response.potentialHijacking ? 0 : 10;
+	score += hijackingScore;
+
+	return score;
 }
