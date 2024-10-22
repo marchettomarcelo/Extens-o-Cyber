@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
 								let privacyScore = calculatePrivacyScore(response, cookiesInfo);
 
 								// Exibe a pontuação no popup
-								let scoreHTML = `<h2>Pontuação de Privacidade</h2><p>A pontuação de privacidade desta página é: <strong>${privacyScore}/100</strong></p>`;
+								let scoreHTML = `<div><h2>Pontuação de Privacidade</h2><p>A pontuação de privacidade desta página é: <strong>${privacyScore}/100</strong></p> </div>`;
 								content.innerHTML = scoreHTML + content.innerHTML;
 							})
 							.catch((error) => {
@@ -188,3 +188,10 @@ function calculatePrivacyScore(response, cookiesInfo) {
 
 	return score;
 }
+
+
+// Adicionar evento de clique ao botão
+document.getElementById('btnMetodologia').addEventListener('click', () => {
+  // Abre a página metodologia.html em uma nova aba
+  browser.tabs.create({ url: browser.runtime.getURL('metodologia.html') });
+});

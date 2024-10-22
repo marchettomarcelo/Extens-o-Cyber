@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Metodologia de Cálculo da Pontuação de Privacidade</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 15px;
+      line-height: 1.6;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+    h2 {
+      font-size: 20px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+    p {
+      margin: 10px 0;
+    }
+    ul {
+      list-style-type: disc;
+      margin-left: 20px;
+    }
+    strong {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Metodologia de Cálculo da Pontuação de Privacidade</h1>
+  <p>A pontuação de privacidade é calculada com base em vários critérios que refletem práticas que podem afetar a privacidade do usuário durante a navegação. Cada critério possui um peso específico na pontuação total, que varia de 0 a 100.</p>
+
+  <h2>Critérios e Pesos:</h2>
+  <ul>
+    <li><strong>Conexões de Terceira Parte (30 pontos):</strong> Avalia o número de conexões a domínios de terceiros. Quanto mais conexões, menor a pontuação neste critério.</li>
+    <li><strong>Cookies de Terceira Parte (25 pontos):</strong> Analisa a quantidade de cookies de terceiros. Um número maior de cookies de terceiros reduz a pontuação.</li>
+    <li><strong>Uso de Armazenamento Local (15 pontos):</strong> Verifica se a página utiliza o <code>localStorage</code> para armazenar dados no dispositivo do usuário. O uso reduz a pontuação neste critério.</li>
+    <li><strong>Canvas Fingerprinting (20 pontos):</strong> Detecta se a página utiliza técnicas de Canvas Fingerprinting para rastreamento. Se detectado, a pontuação neste critério é reduzida a zero.</li>
+    <li><strong>Potenciais Ameaças de Hijacking (10 pontos):</strong> Identifica possíveis ameaças de sequestro de navegador. Se presentes, reduzem a pontuação neste critério.</li>
+  </ul>
+
+  <h2>Cálculo da Pontuação:</h2>
+  <p>A pontuação é calculada somando-se os pontos obtidos em cada critério. Os critérios que não apresentam riscos ou práticas invasivas mantêm sua pontuação máxima, enquanto aqueles que apresentam reduções devido a detecções negativas diminuem a pontuação total.</p>
+
+  <p>Por exemplo:</p>
+  <ul>
+    <li>Se nenhuma conexão de terceira parte for detectada, o critério contribui com os 30 pontos completos.</li>
+    <li>Se forem detectadas 5 conexões de terceira parte, haverá uma redução proporcional, resultando em uma pontuação menor neste critério.</li>
+    <li>Se o Canvas Fingerprinting for detectado, os 20 pontos deste critério serão perdidos.</li>
+  </ul>
+
+  <h2>Interpretação da Pontuação:</h2>
+  <p>A pontuação final indica o nível de privacidade proporcionado pela página:</p>
+  <ul>
+    <li><strong>80 - 100:</strong> Excelente. A página respeita a privacidade do usuário.</li>
+    <li><strong>60 - 79:</strong> Bom. A página tem algumas práticas que podem afetar a privacidade.</li>
+    <li><strong>40 - 59:</strong> Regular. A página apresenta várias práticas que podem comprometer a privacidade.</li>
+    <li><strong>0 - 39:</strong> Ruim. A página tem práticas significativas que afetam negativamente a privacidade do usuário.</li>
+  </ul>
+
+  <h2>Observações:</h2>
+  <p>Esta pontuação é uma ferramenta informativa para auxiliar o usuário a compreender as práticas de privacidade das páginas que visita. Recomenda-se cautela ao navegar em páginas com pontuação baixa.</p>
+</body>
+</html>
